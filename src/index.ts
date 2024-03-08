@@ -7,7 +7,7 @@
 
 import { HttpService, RunService } from "@rbxts/services";
 import { Trove } from "@rbxts/trove";
-import { HttpRequest, HttpQueue, HttpResponse, HttpRequestPriority } from "@rbxts/http-queue";
+import { HttpRequest, HttpQueue, type HttpResponse, HttpRequestPriority } from "@rbxts/http-queue";
 import { Signal } from "@rbxts/beacon";
 
 const OptipostHttpPool = new HttpQueue({
