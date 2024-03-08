@@ -15,6 +15,11 @@ const OptipostHttpPool = new HttpQueue({
 	maxSimultaneousSendOperations: 5,
 });
 
+interface Job {
+	Identifier: string;
+	Task: string;
+}
+
 class Optipost {
 	Authorization?: string;
 	baseUrl: string;
@@ -103,9 +108,9 @@ class Optipost {
 				} else if (response.StatusCode === 401) {
 					warn("[Optipost]: Invalid Authorization token.");
 				} else if (response.StatusCode === 200) {
-					const Jobs = HttpService.JSONDecode(response.Body) as { Identifier: string; Task: string }[];
+					const Jobs = HttpService.JSONDecode(response.Body) as Job[];
 
-					Jobs.forEach(({ Identifier, Task }: { Identifier: string; Task: string }) => {
+					Jobs.forEach(({ Identifier, Task }: Job) => {
 						if (this.debug === true) {
 							warn("[Optipost]: ", Identifier, Task);
 						}
