@@ -107,7 +107,7 @@ class Optipost {
 
 					Jobs.forEach(({ Identifier, Task }: { Identifier: string; Task: string }) => {
 						if (this.debug === true) {
-							warn("[Optipost]: Job recieved:", Identifier, Task);
+							warn("[Optipost]: ", Identifier, Task);
 						}
 
 						this.OnJobRecieved.Fire({ Identifier, Task });
