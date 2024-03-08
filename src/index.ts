@@ -8,7 +8,7 @@
 import { HttpService } from "@rbxts/services";
 import { Trove } from "@rbxts/trove";
 import { HttpRequest, HttpQueue, HttpResponse, HttpRequestPriority } from "@rbxts/http-queue";
-import Signal from "@rbxts/goodsignal";
+import { Signal } from "@rbxts/beacon";
 
 const OptipostHttpPool = new HttpQueue({
 	retryAfter: { cooldown: 5 },
@@ -24,7 +24,7 @@ class Optipost {
 	queryTime: number = 30;
 
 	Trove: Trove = new Trove();
-	OnJobRecieved: Signal = new Signal();
+	OnJobRecieved: Signal<{ Identifier: string; Task: string } | unknown> = new Signal();
 
 	constructor(baseUrl: string, Authorization: string | undefined) {
 		this.Authorization = Authorization || undefined;
@@ -51,6 +51,8 @@ class Optipost {
 			(response: HttpResponse): HttpResponse => {
 				if (response.RequestSuccessful === true && response.StatusCode === 200) {
 					this.isConnected = true;
+				} else if (response.StatusCode === 403) {
+					warn("[OPTIPOST]: Invalid Authorization token.");
 				}
 
 				return response;
@@ -80,8 +82,14 @@ class Optipost {
 			(response: HttpResponse): HttpResponse => {
 				if (response.StatusCode === 404) {
 					this.isConnected = false;
+				} else if (response.StatusCode === 403) {
+					warn("[OPTIPOST]: Invalid Authorization token.");
 				} else if (response.StatusCode === 200) {
-					this.OnJobRecieved.Fire(response.Body);
+					const Jobs = HttpService.JSONDecode(response.Body) as [{ Identifier: string; Task: string }];
+
+					Jobs.forEach(({ Identifier, Task }: { Identifier: string; Task: string }) => {
+						this.OnJobRecieved.Fire({ Identifier, Task });
+					});
 				}
 
 				return response;

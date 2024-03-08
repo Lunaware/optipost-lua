@@ -37,6 +37,6 @@
     "typescript": "^5.4.2"
   },
   "dependencies": {
-    "@rbxts/goodsignal": "^1.0.0"
+    "@rbxts/beacon": "^2.1.1"
   }
 }
