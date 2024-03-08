@@ -5,7 +5,7 @@
  *	@author methamphetqmine
  */
 
-import { HttpService } from "@rbxts/services";
+import { HttpService, RunService } from "@rbxts/services";
 import { Trove } from "@rbxts/trove";
 import { HttpRequest, HttpQueue, HttpResponse, HttpRequestPriority } from "@rbxts/http-queue";
 import { Signal } from "@rbxts/beacon";
@@ -22,6 +22,8 @@ class Optipost {
 	JobId: string = game.JobId;
 	isConnected: boolean = false;
 	queryTime: number = 30;
+	lastQueried: number = os.clock();
+	debug: boolean = false;
 
 	Trove: Trove = new Trove();
 	OnJobRecieved: Signal<{ Identifier: string; Task: string } | unknown> = new Signal();
@@ -29,6 +31,18 @@ class Optipost {
 	constructor(baseUrl: string, Authorization: string | undefined) {
 		this.Authorization = Authorization || undefined;
 		this.baseUrl = baseUrl;
+
+		this.Trove.connect(RunService.Heartbeat, () => {
+			if (this.isConnected && this.lastQueried - os.clock() > this.queryTime) {
+				this.FetchJobs();
+			} else if (this.isConnected === false && this.lastQueried - os.clock() > this.queryTime) {
+				this.Connect();
+
+				if (this.debug === true) {
+					warn("[Optipost]: Reconnecting to the server.");
+				}
+			}
+		});
 	}
 
 	/**
@@ -51,8 +65,12 @@ class Optipost {
 			(response: HttpResponse): HttpResponse => {
 				if (response.RequestSuccessful === true && response.StatusCode === 200) {
 					this.isConnected = true;
+
+					if (this.debug === true) {
+						warn("[Optipost]: Optipost has connected to the server.");
+					}
 				} else if (response.StatusCode === 403) {
-					warn("[OPTIPOST]: Invalid Authorization token.");
+					warn("[Optipost]: Invalid Authorization token.");
 				}
 
 				return response;
@@ -83,11 +101,15 @@ class Optipost {
 				if (response.StatusCode === 404) {
 					this.isConnected = false;
 				} else if (response.StatusCode === 403) {
-					warn("[OPTIPOST]: Invalid Authorization token.");
+					warn("[Optipost]: Invalid Authorization token.");
 				} else if (response.StatusCode === 200) {
 					const Jobs = HttpService.JSONDecode(response.Body) as [{ Identifier: string; Task: string }];
 
 					Jobs.forEach(({ Identifier, Task }: { Identifier: string; Task: string }) => {
+						if (this.debug === true) {
+							warn("[Optipost]: Job recieved:", Identifier, Task);
+						}
+
 						this.OnJobRecieved.Fire({ Identifier, Task });
 					});
 				}
@@ -103,6 +125,10 @@ class Optipost {
 	Destroy(): void {
 		this.isConnected = false;
 		this.Trove.destroy();
+
+		if (this.debug === true) {
+			warn("[Optipost]: Optipost instance has been destroyed.");
+		}
 	}
 }
 
