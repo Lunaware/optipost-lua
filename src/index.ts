@@ -103,7 +103,7 @@ class Optipost {
 				} else if (response.StatusCode === 401) {
 					warn("[Optipost]: Invalid Authorization token.");
 				} else if (response.StatusCode === 200) {
-					const Jobs = HttpService.JSONDecode(response.Body) as [{ Identifier: string; Task: string }];
+					const Jobs = HttpService.JSONDecode(response.Body) as { Identifier: string; Task: string }[];
 
 					Jobs.forEach(({ Identifier, Task }: { Identifier: string; Task: string }) => {
 						if (this.debug === true) {
