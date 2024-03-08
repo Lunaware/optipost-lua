@@ -38,13 +38,15 @@ class Optipost {
 		this.baseUrl = baseUrl;
 
 		this.Trove.connect(RunService.Heartbeat, () => {
-			if (this.isConnected && this.lastQueried - os.clock() > this.queryTime) {
-				this.FetchJobs();
-			} else if (this.isConnected === false && this.lastQueried - os.clock() > this.queryTime) {
-				this.Connect();
+			if (this.lastQueried - os.clock() > this.queryTime) {
+				if (this.isConnected === true) {
+					this.FetchJobs();
+				} else {
+					this.Connect();
 
-				if (this.debug === true) {
-					warn("[Optipost]: Reconnecting to the server.");
+					if (this.debug === true) {
+						warn("[Optipost]: Reconnecting to the server.");
+					}
 				}
 			}
 		});
