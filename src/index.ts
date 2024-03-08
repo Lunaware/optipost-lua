@@ -16,7 +16,7 @@ const OptipostHttpPool = new HttpQueue({
 });
 
 class Optipost {
-	Authorization: undefined | string;
+	Authorization?: string;
 	baseUrl: string;
 	PlaceId: number = game.PlaceId;
 	JobId: string = game.JobId;
@@ -28,7 +28,7 @@ class Optipost {
 	Trove: Trove = new Trove();
 	OnJobRecieved: Signal<{ Identifier: string; Task: string } | unknown> = new Signal();
 
-	constructor(baseUrl: string, Authorization: string | undefined) {
+	constructor(baseUrl: string, Authorization?: string) {
 		this.Authorization = Authorization || undefined;
 		this.baseUrl = baseUrl;
 
