@@ -61,7 +61,7 @@ class Optipost {
 			headers,
 		);
 
-		return OptipostHttpPool.Push(request, HttpRequestPriority.First).andThen(
+		return OptipostHttpPool.Push(request, HttpRequestPriority.First).then(
 			(response: HttpResponse): HttpResponse => {
 				if (response.RequestSuccessful === true && response.StatusCode === 200) {
 					this.isConnected = true;
@@ -69,7 +69,7 @@ class Optipost {
 					if (this.debug === true) {
 						warn("[Optipost]: Optipost has connected to the server.");
 					}
-				} else if (response.StatusCode === 403) {
+				} else if (response.StatusCode === 401) {
 					warn("[Optipost]: Invalid Authorization token.");
 				}
 
@@ -96,11 +96,11 @@ class Optipost {
 			headers,
 		);
 
-		return OptipostHttpPool.Push(request, HttpRequestPriority.Normal).andThen(
+		return OptipostHttpPool.Push(request, HttpRequestPriority.Normal).then(
 			(response: HttpResponse): HttpResponse => {
 				if (response.StatusCode === 404) {
 					this.isConnected = false;
-				} else if (response.StatusCode === 403) {
+				} else if (response.StatusCode === 401) {
 					warn("[Optipost]: Invalid Authorization token.");
 				} else if (response.StatusCode === 200) {
 					const Jobs = HttpService.JSONDecode(response.Body) as [{ Identifier: string; Task: string }];
