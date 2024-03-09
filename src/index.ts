@@ -71,7 +71,7 @@ class Optipost {
 
 		return OptipostHttpPool.Push(request, HttpRequestPriority.First).then(
 			(response: HttpResponse): HttpResponse => {
-				if (response.RequestSuccessful === true && response.StatusCode === 200) {
+				if (response.StatusCode === 200) {
 					this.isConnected = true;
 
 					if (this.debug === true) {
