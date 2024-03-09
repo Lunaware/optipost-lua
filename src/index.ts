@@ -18,7 +18,7 @@ const OptipostHttpPool = new HttpQueue({
 
 interface Job {
 	Identifier: string;
-	Task: string;
+	Data: unknown;
 }
 
 class Optipost {
