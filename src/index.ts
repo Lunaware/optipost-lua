@@ -3,7 +3,7 @@
 /**
  *	@module Optipost
  *	@author methamphetqmine
- *	@version 1.0.0
+ *	@version 1.0.1
  */
 
 import { HttpService, RunService } from "@rbxts/services";
@@ -38,7 +38,7 @@ class Optipost {
 		this.Authorization = Authorization || undefined;
 		this.baseUrl = baseUrl;
 
-		this.Trove.connect(RunService.Heartbeat, () => {
+		this.Trove.connect(RunService.Heartbeat, (deltaTime: number) => {
 			if (this.lastQueried - os.clock() > this.queryTime) {
 				if (this.isConnected === true) {
 					this.FetchJobs();
@@ -51,6 +51,8 @@ class Optipost {
 				}
 			}
 		});
+
+		game.BindToClose(() => this.Destroy());
 	}
 
 	/**
@@ -106,20 +108,18 @@ class Optipost {
 
 		return OptipostHttpPool.Push(request, HttpRequestPriority.Normal).then(
 			(response: HttpResponse): HttpResponse => {
-				if (response.StatusCode === 404) {
+				if (response.StatusCode === 200) {
+					const Jobs = HttpService.JSONDecode(response.Body) as Job[];
+
+					Jobs.forEach((Job: Job) => {
+						if (typeIs(Job, "table")) {
+							this.OnJobRecieved.Fire(Job);
+						}
+					});
+				} else if (response.StatusCode === 404) {
 					this.isConnected = false;
 				} else if (response.StatusCode === 401) {
 					warn("[Optipost]: Invalid Authorization token.");
-				} else if (response.StatusCode === 200) {
-					const Jobs = HttpService.JSONDecode(response.Body) as Job[];
-
-					Jobs.forEach(({ Identifier, Task }: Job) => {
-						if (this.debug === true) {
-							warn("[Optipost]: ", Identifier, Task);
-						}
-
-						this.OnJobRecieved.Fire({ Identifier, Task });
-					});
 				}
 
 				return response;
@@ -129,10 +129,11 @@ class Optipost {
 
 	/**
 	 * Destroys the object and cleans up any resources associated with it.
+	 * @returns void
 	 */
 	Destroy(): void {
+		this.Trove.destroy(); // Disconnects all events and destroys the Trove instance.
 		this.isConnected = false;
-		this.Trove.destroy();
 
 		if (this.debug === true) {
 			warn("[Optipost]: Optipost instance has been destroyed.");
