@@ -1,5 +1,5 @@
 # Optipost
-**Optipost** is a WEB > ROBLOX communications library that helps issue jobs to specific servers inside of a game, and vice versa.
+**Optipost** is a ROBLOX HTTP communications library written in roblox-ts that helps issue jobs to specific servers inside of a game, and vice versa.
 
 ```ts
 /**
@@ -21,4 +21,4 @@ end)
 ```
 
 ## License
-- Licensed under `GNU General Public License v3.0`. Modifications of this repository must be shared.
+\- Licensed under `GNU General Public License v3.0`. Modifications of this repository must be shared.
