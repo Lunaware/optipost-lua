@@ -32,7 +32,7 @@ class Optipost {
 	debug: boolean = false;
 
 	Trove: Trove = new Trove();
-	OnJobRecieved: Signal<{ Identifier: string; Task: string } | unknown> = new Signal();
+	OnJobRecieved: Signal<Job | unknown> = new Signal();
 
 	constructor(baseUrl: string, Authorization?: string) {
 		this.Authorization = Authorization || undefined;
